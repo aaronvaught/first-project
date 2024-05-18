@@ -67,8 +67,6 @@
     let animationInterval = 50; // Milliseconds between frame updates
     const numCircles = 100; // Number of circles (doubled from 50)
     let circles = [];
-    const lines = [];
-    const lineCount = 50; // Number of lines to draw
 
     // Adjust canvas resolution for high-density displays
     function adjustCanvasResolution() {
@@ -102,7 +100,6 @@
             windSpeed = data.wind.speed;
             pressure = data.main.pressure;
             initializeCircles();
-            initializeLines();
           } else {
             alert('City not found. Please try again.');
           }
@@ -123,24 +120,11 @@
           maxRadius: windSpeed * 10,
           currentRadius: 0,
           growthRate: Math.random() * 0.5 + 0.1,
-          hue: (pressure / 10) + (Math.random() * 40 - 20), // More variance in hue
+          hue: (pressure / 10) + (Math.random() * 20 - 10), // More variance in hue
           saturation: 50 + Math.random() * 50,
           lightness: 50 + Math.random() * 50,
           opacity: 0, // Initial opacity for fade-in effect
           growing: true // To control the growing and shrinking
-        });
-      }
-    }
-
-    // Function to initialize lines based on weather data
-    function initializeLines() {
-      lines.length = 0;
-      for (let i = 0; i < lineCount; i++) {
-        lines.push({
-          points: [{ x: Math.random() * canvas.width, y: Math.random() * canvas.height }],
-          hue: (temperature - 10) * 6 + (Math.random() * 40 - 20), // More variance in hue
-          saturation: 50 + Math.random() * 50,
-          lightness: 50 + Math.random() * 50
         });
       }
     }
@@ -154,12 +138,6 @@
       circles.forEach(circle => {
         drawCircle(circle);
         updateCircle(circle);
-      });
-
-      // Draw each line
-      lines.forEach(line => {
-        drawLine(line);
-        updateLine(line);
       });
     }
 
@@ -206,40 +184,12 @@
           circle.maxRadius = windSpeed * 10;
           circle.currentRadius = 0;
           circle.growthRate = Math.random() * 0.5 + 0.1;
-          circle.hue = (pressure / 10) + (Math.random() * 40 - 20); // More variance in hue
+          circle.hue = (pressure / 10) + (Math.random() * 20 - 10); // More variance in hue
           circle.saturation = 50 + Math.random() * 50;
           circle.lightness = 50 + Math.random() * 50;
           circle.opacity = 0;
           circle.growing = true;
         }
-      }
-    }
-
-    // Function to draw a line segment
-    function drawLine(line) {
-      ctx.strokeStyle = `hsl(${line.hue}, ${line.saturation}%, ${line.lightness}%)`;
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(line.points[0].x, line.points[0].y);
-      for (let i = 1; i < line.points.length; i++) {
-        ctx.lineTo(line.points[i].x, line.points[i].y);
-      }
-      ctx.stroke();
-    }
-
-    // Function to update line properties
-    function updateLine(line) {
-      const lastPoint = line.points[line.points.length - 1];
-      const angle = Math.random() * 2 * Math.PI;
-      const distance = 1 + Math.random() * 2; // Length influenced by wind speed
-      const newPoint = {
-        x: lastPoint.x + Math.cos(angle) * distance,
-        y: lastPoint.y + Math.sin(angle) * distance
-      };
-      line.points.push(newPoint);
-
-      if (line.points.length > 100) {
-        line.points.shift();
       }
     }
 
@@ -256,8 +206,7 @@
     }
 
     function animate() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
-      initializePattern(); // Redraw the entire pattern
+      drawArt();
       setTimeout(() => {
         animationFrameId = requestAnimationFrame(animate);
       }, animationInterval);
