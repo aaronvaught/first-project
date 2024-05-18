@@ -111,15 +111,30 @@
 
     // Function to draw artistic interpretation based on weather data
     function drawArt() {
-      // Create motion blur by drawing a semi-transparent rectangle over the entire canvas
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
+      drawBackground();
+      
       // Draw each line
       lines.forEach(line => {
         drawCurve(line);
         updateLine(line);
       });
+    }
+
+    // Function to draw a radial gradient background based on weather data
+    function drawBackground() {
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2;
+      const radius = Math.sqrt(canvas.width ** 2 + canvas.height ** 2) / 2;
+      
+      const innerColor = `hsl(${(temperature - 10) * 6}, 100%, 50%)`; // Color based on temperature
+      const outerColor = `hsl(${humidity * 1.2}, 100%, 50%)`; // Color based on humidity
+      
+      const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, radius);
+      gradient.addColorStop(0, innerColor);
+      gradient.addColorStop(1, outerColor);
+      
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
 
     // Function to draw a single curved line
