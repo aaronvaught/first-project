@@ -159,4 +159,43 @@
           circle.maxRadius = windSpeed * 10;
           circle.currentRadius = 0;
           circle.growthRate = Math.random() * 0.5 + 0.1;
-          circle.hue = (pressure / 10) + (Math.random
+          circle.hue = (pressure / 10) + (Math.random() * 10);
+          circle.saturation = 50 + Math.random() * 50;
+          circle.lightness = 50 + Math.random() * 50;
+          circle.opacity = 0;
+          circle.growing = true;
+        }
+      }
+    }
+
+    function animate() {
+      drawArt();
+      setTimeout(() => {
+        animationFrameId = requestAnimationFrame(animate);
+      }, animationInterval);
+    }
+
+    // Initial fetch of weather data
+    fetchWeather();
+
+    // Fetch weather data every minute (60000 milliseconds)
+    setInterval(fetchWeather, 60000); // 60000 milliseconds = 1 minute
+
+    // Start the animation
+    animate();
+
+    // Fullscreen functionality
+    canvas.addEventListener('click', toggleFullScreen);
+
+    function toggleFullScreen() {
+      if (!document.fullscreenElement) {
+        canvas.requestFullscreen().catch(err => {
+          alert(`Error attempting to enable fullscreen mode: ${err.message}`);
+        });
+      } else {
+        document.exitFullscreen();
+      }
+    }
+  </script>
+</body>
+</html>
