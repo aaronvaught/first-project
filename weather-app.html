@@ -36,8 +36,6 @@
     const cityInput = document.getElementById('cityInput');
     const apiKey = 'a3bc8f1f2f283984612a5876892f82c7'; // Updated OpenWeatherMap API key
     let animationFrameId;
-    let circleSize = 0;
-    let growing = true;
     let temperature = 20;
     let humidity = 50;
     let windSpeed = 5;
@@ -83,22 +81,32 @@
       ctx.fillStyle = `hsl(${temperature * 10}, 50%, ${humidity / 2}%)`;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Draw animated circle based on wind speed and pressure
-      let circleColor = `hsl(${pressure / 10}, 70%, 50%)`;
-      let maxCircleSize = windSpeed * 10;
-
-      if (growing) {
-        circleSize += 0.5;
-        if (circleSize > maxCircleSize) growing = false;
-      } else {
-        circleSize -= 0.5;
-        if (circleSize < 0) growing = true;
+      // Draw abstract lines based on weather data
+      const numLines = 50; // Number of lines
+      for (let i = 0; i < numLines; i++) {
+        drawLine();
       }
+    }
 
+    // Function to draw a single line
+    function drawLine() {
+      const startX = Math.random() * canvas.width;
+      const startY = Math.random() * canvas.height;
+      const length = windSpeed * 10;
+      const angle = Math.random() * 2 * Math.PI;
+      const endX = startX + length * Math.cos(angle);
+      const endY = startY + length * Math.sin(angle);
+
+      const colorHue = (pressure / 10) + (Math.random() * 10); // Adding a slight variation
+      const colorSaturation = 50 + Math.random() * 50; // Random saturation between 50% and 100%
+      const colorLightness = 50 + Math.random() * 50; // Random lightness between 50% and 100%
+
+      ctx.strokeStyle = `hsl(${colorHue}, ${colorSaturation}%, ${colorLightness}%)`;
+      ctx.lineWidth = Math.random() * 5; // Random line width between 0 and 5
       ctx.beginPath();
-      ctx.arc(canvas.width / 2, canvas.height / 2, circleSize, 0, Math.PI * 2);
-      ctx.fillStyle = circleColor;
-      ctx.fill();
+      ctx.moveTo(startX, startY);
+      ctx.lineTo(endX, endY);
+      ctx.stroke();
     }
 
     function animate() {
