@@ -35,6 +35,13 @@
     const getWeatherBtn = document.getElementById('getWeatherBtn');
     const cityInput = document.getElementById('cityInput');
     const apiKey = 'a3bc8f1f2f283984612a5876892f82c7'; // Updated OpenWeatherMap API key
+    let animationFrameId;
+    let circleSize = 0;
+    let growing = true;
+    let temperature = 20;
+    let humidity = 50;
+    let windSpeed = 5;
+    let pressure = 1013;
 
     getWeatherBtn.addEventListener('click', fetchWeather);
 
@@ -52,9 +59,11 @@
         .then(response => response.json())
         .then(data => {
           if (data.cod === 200) {
-            const temperature = data.main.temp;
-            const humidity = data.main.humidity;
-            drawArt(temperature, humidity);
+            temperature = data.main.temp;
+            humidity = data.main.humidity;
+            windSpeed = data.wind.speed;
+            pressure = data.main.pressure;
+            drawArt();
           } else {
             alert('City not found. Please try again.');
           }
@@ -66,17 +75,45 @@
     }
 
     // Function to draw artistic interpretation based on weather data
-    function drawArt(temperature, humidity) {
+    function drawArt() {
       // Clear canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Draw artistic interpretation based on weather data
+      // Draw background based on temperature and humidity
       ctx.fillStyle = `hsl(${temperature * 10}, 50%, ${humidity / 2}%)`;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Draw animated circle based on wind speed and pressure
+      let circleColor = `hsl(${pressure / 10}, 70%, 50%)`;
+      let maxCircleSize = windSpeed * 10;
+
+      if (growing) {
+        circleSize += 0.5;
+        if (circleSize > maxCircleSize) growing = false;
+      } else {
+        circleSize -= 0.5;
+        if (circleSize < 0) growing = true;
+      }
+
+      ctx.beginPath();
+      ctx.arc(canvas.width / 2, canvas.height / 2, circleSize, 0, Math.PI * 2);
+      ctx.fillStyle = circleColor;
+      ctx.fill();
     }
+
+    function animate() {
+      drawArt();
+      animationFrameId = requestAnimationFrame(animate);
+    }
+
+    // Initial fetch of weather data
+    fetchWeather();
 
     // Fetch weather data every minute (60000 milliseconds)
     setInterval(fetchWeather, 60000); // 60000 milliseconds = 1 minute
+
+    // Start the animation
+    animate();
 
     // Fullscreen functionality
     canvas.addEventListener('click', toggleFullScreen);
