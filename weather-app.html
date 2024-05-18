@@ -65,6 +65,10 @@
     let windSpeed = 5;
     let pressure = 1013;
     let animationInterval = 50; // Milliseconds between frame updates
+    const numCircles = 100; // Number of circles (doubled from 50)
+    let circles = [];
+    const lines = [];
+    const lineCount = 50; // Number of lines to draw
 
     // Adjust canvas resolution for high-density displays
     function adjustCanvasResolution() {
@@ -97,7 +101,8 @@
             humidity = data.main.humidity;
             windSpeed = data.wind.speed;
             pressure = data.main.pressure;
-            initializePattern();
+            initializeCircles();
+            initializeLines();
           } else {
             alert('City not found. Please try again.');
           }
@@ -108,11 +113,54 @@
         });
     }
 
-    // Function to initialize the pattern based on weather data
-    function initializePattern() {
+    // Function to initialize circles based on weather data
+    function initializeCircles() {
+      circles = [];
+      for (let i = 0; i < numCircles; i++) {
+        circles.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          maxRadius: windSpeed * 10,
+          currentRadius: 0,
+          growthRate: Math.random() * 0.5 + 0.1,
+          hue: (pressure / 10) + (Math.random() * 40 - 20), // More variance in hue
+          saturation: 50 + Math.random() * 50,
+          lightness: 50 + Math.random() * 50,
+          opacity: 0, // Initial opacity for fade-in effect
+          growing: true // To control the growing and shrinking
+        });
+      }
+    }
+
+    // Function to initialize lines based on weather data
+    function initializeLines() {
+      lines.length = 0;
+      for (let i = 0; i < lineCount; i++) {
+        lines.push({
+          points: [{ x: Math.random() * canvas.width, y: Math.random() * canvas.height }],
+          hue: (temperature - 10) * 6 + (Math.random() * 40 - 20), // More variance in hue
+          saturation: 50 + Math.random() * 50,
+          lightness: 50 + Math.random() * 50
+        });
+      }
+    }
+
+    // Function to draw artistic interpretation based on weather data
+    function drawArt() {
       drawBackground();
       drawCenterCircle();
-      drawLines();
+
+      // Draw each circle
+      circles.forEach(circle => {
+        drawCircle(circle);
+        updateCircle(circle);
+      });
+
+      // Draw each line
+      lines.forEach(line => {
+        drawLine(line);
+        updateLine(line);
+      });
     }
 
     // Function to draw a radial gradient background based on weather data
@@ -132,30 +180,66 @@
       ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
 
-    // Function to draw thin lines based on weather data
-    function drawLines() {
-      const lineCount = 200; // Number of lines to draw
-      const lineLength = 50 + windSpeed * 5; // Length of lines influenced by wind speed
-      const maxOffset = humidity / 2; // Maximum offset influenced by humidity
-      const hueVariance = pressure / 10; // Hue variance influenced by pressure
+    // Function to draw a single circle
+    function drawCircle(circle) {
+      ctx.fillStyle = `hsla(${circle.hue}, ${circle.saturation}%, ${circle.lightness}%, ${circle.opacity})`;
+      ctx.beginPath();
+      ctx.arc(circle.x, circle.y, circle.currentRadius, 0, 2 * Math.PI);
+      ctx.fill();
+    }
 
-      for (let i = 0; i < lineCount; i++) {
-        const startX = Math.random() * canvas.width;
-        const startY = Math.random() * canvas.height;
-        const offsetX = (Math.random() - 0.5) * maxOffset;
-        const offsetY = (Math.random() - 0.5) * maxOffset;
-        const endX = startX + offsetX + Math.cos(i) * lineLength;
-        const endY = startY + offsetY + Math.sin(i) * lineLength;
-        const hue = (temperature - 10) * 6 + (Math.random() * hueVariance - hueVariance / 2);
-        const saturation = 50 + Math.random() * 50;
-        const lightness = 50 + Math.random() * 50;
+    // Function to update circle properties
+    function updateCircle(circle) {
+      if (circle.growing) {
+        circle.currentRadius += circle.growthRate;
+        circle.opacity += 0.02; // Fade-in effect
+        if (circle.currentRadius >= circle.maxRadius) {
+          circle.growing = false;
+        }
+      } else {
+        circle.currentRadius -= circle.growthRate;
+        circle.opacity -= 0.02; // Fade-out effect
+        if (circle.currentRadius <= 0) {
+          // Reinitialize circle
+          circle.x = Math.random() * canvas.width;
+          circle.y = Math.random() * canvas.height;
+          circle.maxRadius = windSpeed * 10;
+          circle.currentRadius = 0;
+          circle.growthRate = Math.random() * 0.5 + 0.1;
+          circle.hue = (pressure / 10) + (Math.random() * 40 - 20); // More variance in hue
+          circle.saturation = 50 + Math.random() * 50;
+          circle.lightness = 50 + Math.random() * 50;
+          circle.opacity = 0;
+          circle.growing = true;
+        }
+      }
+    }
 
-        ctx.strokeStyle = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
-        ctx.lineWidth = 0.5;
-        ctx.beginPath();
-        ctx.moveTo(startX, startY);
-        ctx.lineTo(endX, endY);
-        ctx.stroke();
+    // Function to draw a line segment
+    function drawLine(line) {
+      ctx.strokeStyle = `hsl(${line.hue}, ${line.saturation}%, ${line.lightness}%)`;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(line.points[0].x, line.points[0].y);
+      for (let i = 1; i < line.points.length; i++) {
+        ctx.lineTo(line.points[i].x, line.points[i].y);
+      }
+      ctx.stroke();
+    }
+
+    // Function to update line properties
+    function updateLine(line) {
+      const lastPoint = line.points[line.points.length - 1];
+      const angle = Math.random() * 2 * Math.PI;
+      const distance = 1 + Math.random() * 2; // Length influenced by wind speed
+      const newPoint = {
+        x: lastPoint.x + Math.cos(angle) * distance,
+        y: lastPoint.y + Math.sin(angle) * distance
+      };
+      line.points.push(newPoint);
+
+      if (line.points.length > 100) {
+        line.points.shift();
       }
     }
 
