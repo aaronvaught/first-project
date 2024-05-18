@@ -40,7 +40,9 @@
     let humidity = 50;
     let windSpeed = 5;
     let pressure = 1013;
-    let animationInterval = 200; // Milliseconds between frame updates
+    let animationInterval = 50; // Milliseconds between frame updates
+    const numLines = 50; // Number of lines
+    let lines = [];
 
     // Adjust canvas resolution for high-density displays
     function adjustCanvasResolution() {
@@ -73,7 +75,7 @@
             humidity = data.main.humidity;
             windSpeed = data.wind.speed;
             pressure = data.main.pressure;
-            drawArt();
+            initializeLines();
           } else {
             alert('City not found. Please try again.');
           }
@@ -84,41 +86,60 @@
         });
     }
 
-    // Function to draw artistic interpretation based on weather data
-    function drawArt() {
-      // Clear canvas
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      // Draw background based on temperature and humidity
-      ctx.fillStyle = `hsl(${temperature * 10}, 50%, ${humidity / 2}%)`;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      // Draw abstract lines based on weather data
-      const numLines = 50; // Number of lines
+    // Function to initialize lines based on weather data
+    function initializeLines() {
+      lines = [];
       for (let i = 0; i < numLines; i++) {
-        drawLine();
+        lines.push({
+          startX: Math.random() * canvas.width,
+          startY: Math.random() * canvas.height,
+          length: windSpeed * 10,
+          angle: Math.random() * 2 * Math.PI,
+          speed: Math.random() * 0.5 + 0.1,
+          hue: (pressure / 10) + (Math.random() * 10),
+          saturation: 50 + Math.random() * 50,
+          lightness: 50 + Math.random() * 50,
+          lineWidth: Math.random() * 5
+        });
       }
     }
 
+    // Function to draw artistic interpretation based on weather data
+    function drawArt() {
+      // Create motion blur by drawing a semi-transparent rectangle over the entire canvas
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Draw each line
+      lines.forEach(line => {
+        drawLine(line);
+        updateLine(line);
+      });
+    }
+
     // Function to draw a single line
-    function drawLine() {
-      const startX = Math.random() * canvas.width;
-      const startY = Math.random() * canvas.height;
-      const length = windSpeed * 10;
-      const angle = Math.random() * 2 * Math.PI;
-      const endX = startX + length * Math.cos(angle);
-      const endY = startY + length * Math.sin(angle);
+    function drawLine(line) {
+      const endX = line.startX + line.length * Math.cos(line.angle);
+      const endY = line.startY + line.length * Math.sin(line.angle);
 
-      const colorHue = (pressure / 10) + (Math.random() * 10); // Adding a slight variation
-      const colorSaturation = 50 + Math.random() * 50; // Random saturation between 50% and 100%
-      const colorLightness = 50 + Math.random() * 50; // Random lightness between 50% and 100%
-
-      ctx.strokeStyle = `hsl(${colorHue}, ${colorSaturation}%, ${colorLightness}%)`;
-      ctx.lineWidth = Math.random() * 5; // Random line width between 0 and 5
+      ctx.strokeStyle = `hsl(${line.hue}, ${line.saturation}%, ${line.lightness}%)`;
+      ctx.lineWidth = line.lineWidth;
       ctx.beginPath();
-      ctx.moveTo(startX, startY);
+      ctx.moveTo(line.startX, line.startY);
       ctx.lineTo(endX, endY);
       ctx.stroke();
+    }
+
+    // Function to update line position
+    function updateLine(line) {
+      line.startX += line.speed * Math.cos(line.angle);
+      line.startY += line.speed * Math.sin(line.angle);
+
+      // Wrap lines around canvas edges
+      if (line.startX > canvas.width) line.startX = 0;
+      if (line.startX < 0) line.startX = canvas.width;
+      if (line.startY > canvas.height) line.startY = 0;
+      if (line.startY < 0) line.startY = canvas.height;
     }
 
     function animate() {
