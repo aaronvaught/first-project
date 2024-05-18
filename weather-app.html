@@ -85,13 +85,13 @@
 
       // Draw animated circle based on wind speed and pressure
       let circleColor = `hsl(${pressure / 10}, 70%, 50%)`;
-      let maxCircleSize = windSpeed * 20;
+      let maxCircleSize = windSpeed * 10;
 
       if (growing) {
-        circleSize += 0.7;
+        circleSize += 0.5;
         if (circleSize > maxCircleSize) growing = false;
       } else {
-        circleSize -= 0.7;
+        circleSize -= 0.5;
         if (circleSize < 0) growing = true;
       }
 
