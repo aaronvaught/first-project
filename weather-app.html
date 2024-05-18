@@ -40,6 +40,18 @@
     let humidity = 50;
     let windSpeed = 5;
     let pressure = 1013;
+    let animationInterval = 200; // Milliseconds between frame updates
+
+    // Adjust canvas resolution for high-density displays
+    function adjustCanvasResolution() {
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = canvas.clientWidth * dpr;
+      canvas.height = canvas.clientHeight * dpr;
+      ctx.scale(dpr, dpr);
+    }
+
+    window.addEventListener('resize', adjustCanvasResolution);
+    adjustCanvasResolution();
 
     getWeatherBtn.addEventListener('click', fetchWeather);
 
@@ -111,7 +123,9 @@
 
     function animate() {
       drawArt();
-      animationFrameId = requestAnimationFrame(animate);
+      setTimeout(() => {
+        animationFrameId = requestAnimationFrame(animate);
+      }, animationInterval);
     }
 
     // Initial fetch of weather data
