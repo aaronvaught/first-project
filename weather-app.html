@@ -10,19 +10,43 @@
       padding: 0;
       height: 100%;
       overflow: hidden;
+      font-family: Arial, sans-serif;
     }
     canvas {
       display: block;
       width: 100%;
       height: 100%;
     }
+    .input-container {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255, 255, 255, 0.8);
+      padding: 10px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      z-index: 10;
+    }
     input, button {
-      margin: 10px;
+      padding: 10px;
+      margin: 5px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
     }
   </style>
 </head>
 <body>
-  <div style="text-align: center; padding-top: 10px;">
+  <div class="input-container">
     <label for="cityInput">Enter City:</label>
     <input type="text" id="cityInput" placeholder="City">
     <button id="getWeatherBtn">Get Weather</button>
