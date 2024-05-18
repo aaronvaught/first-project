@@ -41,8 +41,8 @@
     let windSpeed = 5;
     let pressure = 1013;
     let animationInterval = 50; // Milliseconds between frame updates
-    const numLines = 50; // Number of lines
-    let lines = [];
+    const numCircles = 100; // Number of circles (doubled from 50)
+    let circles = [];
 
     // Adjust canvas resolution for high-density displays
     function adjustCanvasResolution() {
@@ -75,7 +75,7 @@
             humidity = data.main.humidity;
             windSpeed = data.wind.speed;
             pressure = data.main.pressure;
-            initializeLines();
+            initializeCircles();
           } else {
             alert('City not found. Please try again.');
           }
@@ -86,25 +86,21 @@
         });
     }
 
-    // Function to initialize lines based on weather data
-    function initializeLines() {
-      lines = [];
-      for (let i = 0; i < numLines; i++) {
-        lines.push({
-          startX: Math.random() * canvas.width,
-          startY: Math.random() * canvas.height,
-          length: windSpeed * 30,
-          angle: Math.random() * 2 * Math.PI,
-          speed: (Math.random() * 0.5 + 0.1) * 3, // 3 times faster
+    // Function to initialize circles based on weather data
+    function initializeCircles() {
+      circles = [];
+      for (let i = 0; i < numCircles; i++) {
+        circles.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          maxRadius: windSpeed * 10,
+          currentRadius: 0,
+          growthRate: Math.random() * 0.5 + 0.1,
           hue: (pressure / 10) + (Math.random() * 10),
           saturation: 50 + Math.random() * 50,
           lightness: 50 + Math.random() * 50,
-          lineWidth: Math.random() * 5,
-          controlX: Math.random() * canvas.width,
-          controlY: Math.random() * canvas.height,
-          curvature: (humidity / 100) * 2, // Curvature based on humidity
-          progress: 0, // Progress of the line drawing
-          opacity: 0 // Initial opacity for fade-in effect
+          opacity: 0, // Initial opacity for fade-in effect
+          growing: true // To control the growing and shrinking
         });
       }
     }
@@ -112,11 +108,11 @@
     // Function to draw artistic interpretation based on weather data
     function drawArt() {
       drawBackground();
-      
-      // Draw each line
-      lines.forEach(line => {
-        drawCurve(line);
-        updateLine(line);
+
+      // Draw each circle
+      circles.forEach(circle => {
+        drawCircle(circle);
+        updateCircle(circle);
       });
     }
 
@@ -125,102 +121,42 @@
       const centerX = canvas.width / 2;
       const centerY = canvas.height / 2;
       const radius = Math.sqrt(canvas.width ** 2 + canvas.height ** 2) / 2;
-      
+
       const innerColor = `hsl(${(temperature - 10) * 6}, 100%, 50%)`; // Color based on temperature
       const outerColor = `hsl(${humidity * 1.2}, 100%, 50%)`; // Color based on humidity
-      
+
       const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, radius);
       gradient.addColorStop(0, innerColor);
       gradient.addColorStop(1, outerColor);
-      
+
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
 
-    // Function to draw a single curved line
-    function drawCurve(line) {
-      const progressLength = line.length * line.progress;
-      const endX = line.startX + progressLength * Math.cos(line.angle);
-      const endY = line.startY + progressLength * Math.sin(line.angle);
-
-      ctx.strokeStyle = `hsla(${line.hue}, ${line.saturation}%, ${line.lightness}%, ${line.opacity})`;
-      ctx.lineWidth = line.lineWidth;
+    // Function to draw a single circle
+    function drawCircle(circle) {
+      ctx.fillStyle = `hsla(${circle.hue}, ${circle.saturation}%, ${circle.lightness}%, ${circle.opacity})`;
       ctx.beginPath();
-      ctx.moveTo(line.startX, line.startY);
-      ctx.quadraticCurveTo(line.controlX, line.controlY, endX, endY);
-      ctx.stroke();
+      ctx.arc(circle.x, circle.y, circle.currentRadius, 0, 2 * Math.PI);
+      ctx.fill();
     }
 
-    // Function to update line position
-    function updateLine(line) {
-      line.progress += 0.01; // Gradually draw the line
-
-      // Increase opacity for fade-in effect
-      if (line.opacity < 1) {
-        line.opacity += 0.02;
-      }
-
-      // Move control points to create curving motion
-      line.controlX += line.curvature * (Math.random() - 0.5);
-      line.controlY += line.curvature * (Math.random() - 0.5);
-
-      // Wrap control points around canvas edges
-      if (line.controlX > canvas.width) line.controlX = 0;
-      if (line.controlX < 0) line.controlX = canvas.width;
-      if (line.controlY > canvas.height) line.controlY = 0;
-      if (line.controlY < 0) line.controlY = canvas.height;
-
-      // Reset line when fully drawn and fade out
-      if (line.progress >= 1) {
-        line.opacity -= 0.02;
-        if (line.opacity <= 0) {
-          // Reinitialize line
-          line.startX = Math.random() * canvas.width;
-          line.startY = Math.random() * canvas.height;
-          line.length = windSpeed * 30;
-          line.angle = Math.random() * 2 * Math.PI;
-          line.speed = (Math.random() * 0.5 + 0.1) * 3; // 3 times faster
-          line.hue = (pressure / 10) + (Math.random() * 10);
-          line.saturation = 50 + Math.random() * 50;
-          line.lightness = 50 + Math.random() * 50;
-          line.lineWidth = Math.random() * 5;
-          line.controlX = Math.random() * canvas.width;
-          line.controlY = Math.random() * canvas.height;
-          line.curvature = (humidity / 100) * 2; // Curvature based on humidity
-          line.progress = 0;
-          line.opacity = 0;
+    // Function to update circle properties
+    function updateCircle(circle) {
+      if (circle.growing) {
+        circle.currentRadius += circle.growthRate;
+        circle.opacity += 0.02; // Fade-in effect
+        if (circle.currentRadius >= circle.maxRadius) {
+          circle.growing = false;
         }
-      }
-    }
-
-    function animate() {
-      drawArt();
-      setTimeout(() => {
-        animationFrameId = requestAnimationFrame(animate);
-      }, animationInterval);
-    }
-
-    // Initial fetch of weather data
-    fetchWeather();
-
-    // Fetch weather data every minute (60000 milliseconds)
-    setInterval(fetchWeather, 60000); // 60000 milliseconds = 1 minute
-
-    // Start the animation
-    animate();
-
-    // Fullscreen functionality
-    canvas.addEventListener('click', toggleFullScreen);
-
-    function toggleFullScreen() {
-      if (!document.fullscreenElement) {
-        canvas.requestFullscreen().catch(err => {
-          alert(`Error attempting to enable fullscreen mode: ${err.message}`);
-        });
       } else {
-        document.exitFullscreen();
-      }
-    }
-  </script>
-</body>
-</html>
+        circle.currentRadius -= circle.growthRate;
+        circle.opacity -= 0.02; // Fade-out effect
+        if (circle.currentRadius <= 0) {
+          // Reinitialize circle
+          circle.x = Math.random() * canvas.width;
+          circle.y = Math.random() * canvas.height;
+          circle.maxRadius = windSpeed * 10;
+          circle.currentRadius = 0;
+          circle.growthRate = Math.random() * 0.5 + 0.1;
+          circle.hue = (pressure / 10) + (Math.random
