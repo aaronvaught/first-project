@@ -96,7 +96,7 @@
           maxRadius: windSpeed * 10,
           currentRadius: 0,
           growthRate: Math.random() * 0.5 + 0.1,
-          hue: (pressure / 10) + (Math.random() * 10),
+          hue: (pressure / 10) + (Math.random() * 20 - 10), // More variance in hue
           saturation: 50 + Math.random() * 50,
           lightness: 50 + Math.random() * 50,
           opacity: 0, // Initial opacity for fade-in effect
@@ -159,7 +159,7 @@
           circle.maxRadius = windSpeed * 10;
           circle.currentRadius = 0;
           circle.growthRate = Math.random() * 0.5 + 0.1;
-          circle.hue = (pressure / 10) + (Math.random() * 10);
+          circle.hue = (pressure / 10) + (Math.random() * 20 - 10); // More variance in hue
           circle.saturation = 50 + Math.random() * 50;
           circle.lightness = 50 + Math.random() * 50;
           circle.opacity = 0;
