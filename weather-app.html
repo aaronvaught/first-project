@@ -108,6 +108,7 @@
     // Function to draw artistic interpretation based on weather data
     function drawArt() {
       drawBackground();
+      drawCenterCircle();
 
       // Draw each circle
       circles.forEach(circle => {
@@ -166,6 +167,18 @@
           circle.growing = true;
         }
       }
+    }
+
+    // Function to draw a stationary white circle in the center of the canvas
+    function drawCenterCircle() {
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2;
+      const radius = 50; // Fixed radius for the center circle
+
+      ctx.fillStyle = 'white';
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+      ctx.fill();
     }
 
     function animate() {
