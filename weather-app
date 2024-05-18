@@ -1,1 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weather Art</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+    }
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+    input, button {
+      margin: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div style="text-align: center; padding-top: 10px;">
+    <label for="cityInput">Enter City:</label>
+    <input type="text" id="cityInput" placeholder="City">
+    <button id="getWeatherBtn">Get Weather</button>
+  </div>
+  <canvas id="weatherCanvas"></canvas>
 
+  <script>
+    const canvas = document.getElementById('weatherCanvas');
+    const ctx = canvas.getContext('2d');
+    const getWeatherBtn = document.getElementById('getWeatherBtn');
+    const cityInput = document.getElementById('cityInput');
+    const apiKey = 'a3bc8f1f2f283984612a5876892f82c7'; // Updated OpenWeatherMap API key
+
+    getWeatherBtn.addEventListener('click', fetchWeather);
+
+    // Function to fetch weather data
+    function fetchWeather() {
+      const city = cityInput.value.trim();
+      if (city === '') {
+        alert('Please enter a city name.');
+        return;
+      }
+
+      const apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`;
+
+      fetch(apiUrl)
+        .then(response => response.json())
+        .then(data => {
+          if (data.cod === 200) {
+            const temperature = data.main.temp;
+            const humidity = data.main.humidity;
+            drawArt(temperature, humidity);
+          } else {
+            alert('City not found. Please try again.');
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching weather data:', error);
+          alert('Failed to fetch weather data. Please try again later.');
+        });
+    }
+
+    // Function to draw artistic interpretation based on weather data
+    function drawArt(temperature, humidity) {
+      // Clear canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw artistic interpretation based on weather data
+      ctx.fillStyle = `hsl(${temperature * 10}, 50%, ${humidity / 2}%)`;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+
+    // Fetch weather data every minute (60000 milliseconds)
+    setInterval(fetchWeather, 60000); // 60000 milliseconds = 1 minute
+
+    // Fullscreen functionality
+    canvas.addEventListener('click', toggleFullScreen);
+
+    function toggleFullScreen() {
+      if (!document.fullscreenElement) {
+        canvas.requestFullscreen().catch(err => {
+          alert(`Error attempting to enable fullscreen mode: ${err.message}`);
+        });
+      } else {
+        document.exitFullscreen();
+      }
+    }
+  </script>
+</body>
+</html>
