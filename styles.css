@@ -1,11 +1,17 @@
 /* styles.css */
 body {
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     height: 100vh;
     margin: 0;
     background-color: #222;
+    color: #fff;
+}
+
+#controls {
+    margin-bottom: 10px;
 }
 
 canvas {
