@@ -1,10 +1,15 @@
 // script.js
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
+const startBtn = document.getElementById('startBtn');
+const stopBtn = document.getElementById('stopBtn');
+const resetBtn = document.getElementById('resetBtn');
 
-const rows = 50;
-const cols = 50;
+let animationId;
+
 const cellSize = 10;
+const rows = Math.floor(window.innerHeight / cellSize);
+const cols = Math.floor(window.innerWidth / cellSize);
 
 canvas.width = cols * cellSize;
 canvas.height = rows * cellSize;
@@ -22,11 +27,21 @@ function drawGrid() {
         for (let col = 0; col < cols; col++) {
             ctx.beginPath();
             ctx.rect(col * cellSize, row * cellSize, cellSize, cellSize);
-            ctx.fillStyle = grid[row][col] ? '#00FF00' : '#000000';
+            if (grid[row][col] === 1) {
+                ctx.fillStyle = getRandomColor();
+            } else {
+                ctx.fillStyle = '#000000';
+            }
             ctx.fill();
+            ctx.strokeStyle = '#444';
             ctx.stroke();
         }
     }
+}
+
+function getRandomColor() {
+    const colors = ['#FF5733', '#33FF57', '#3357FF', '#F33FF5', '#F5A233', '#33FFF5'];
+    return colors[Math.floor(Math.random() * colors.length)];
 }
 
 function updateGrid() {
@@ -62,7 +77,27 @@ function updateGrid() {
 function gameLoop() {
     drawGrid();
     updateGrid();
-    requestAnimationFrame(gameLoop);
+    animationId = requestAnimationFrame(gameLoop);
 }
 
-gameLoop();
+startBtn.addEventListener('click', () => {
+    if (!animationId) {
+        gameLoop();
+    }
+});
+
+stopBtn.addEventListener('click', () => {
+    cancelAnimationFrame(animationId);
+    animationId = null;
+});
+
+resetBtn.addEventListener('click', () => {
+    grid = createGrid();
+    drawGrid();
+    if (animationId) {
+        cancelAnimationFrame(animationId);
+        animationId = null;
+    }
+});
+
+drawGrid();
